@@ -1,30 +1,113 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import { ref, onMounted, watch } from 'vue';
+
+// Reactive state
+const tasks = ref([]);
+const showForm = ref(false);
+const newTask = ref('');
+
+// Load tasks from localStorage
+onMounted(() => {
+  const savedTasks = localStorage.getItem('tasks');
+  tasks.value = savedTasks ? JSON.parse(savedTasks) : [];
+});
+
+// Save tasks to localStorage whenever they change
+watch(
+  tasks,
+  (newVal) => {
+    localStorage.setItem('tasks', JSON.stringify(newVal));
+  },
+  { deep: true }
+);
+
+// Methods
+const toggleForm = () => {
+  showForm.value = !showForm.value;
+};
+
+const addTask = () => {
+  if (newTask.value.trim().length < 3) {
+    alert('Task name must be at least 3 characters.');
+    return;
+  }
+  tasks.value.push({ name: newTask.value.trim(), completed: false });
+  newTask.value = '';
+};
+
+const deleteTask = (index) => {
+  tasks.value.splice(index, 1);
+};
+
+const toggleCompletion = (index) => {
+  tasks.value[index].completed = !tasks.value[index].completed;
+};
+
+// Dynamic styles
+const taskStyle = (completed) =>
+  completed
+    ? 'bg-green-100 border-red-500 border-2'
+    : 'bg-white border-gray-300 border';
 </script>
 
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div class="max-w-lg mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4 text-center">Task Manager</h1>
+
+    <!-- Toggle Add Task Form -->
+    <button
+      @click="toggleForm"
+      class="btn btn-primary mb-4 w-full"
+    >
+      {{ showForm ? 'Close Form' : 'Add Task' }}
+    </button>
+
+    <!-- Add Task Form -->
+    <div v-if="showForm" class="mb-4 space-y-2">
+      <input
+        v-model="newTask"
+        type="text"
+        placeholder="Enter task name"
+        class="input input-bordered w-full"
+      />
+      <button @click="addTask" class="btn btn-success w-full">Add Task</button>
+    </div>
+
+    <!-- Conditional Rendering for Task List -->
+    <p v-if="!tasks.length" class="text-center text-gray-500">No tasks available</p>
+
+    <!-- Task List -->
+    <ul class="space-y-3">
+      <li
+        v-for="(task, index) in tasks"
+        :key="index"
+        :class="`p-4 rounded-md shadow ${taskStyle(task.completed)}`"
+      >
+        <div class="flex items-center justify-between">
+          <span
+            @click="toggleCompletion(index)"
+            class="cursor-pointer text-lg font-medium"
+            :class="{ 'line-through': task.completed }"
+          >
+            {{ task.name }}
+          </span>
+
+          <!-- Action Buttons -->
+          <div class="flex space-x-2">
+            <button
+              @click="toggleCompletion(index)"
+              :class="task.completed ? 'btn btn-warning btn-sm' : 'btn btn-success btn-sm'"
+            >
+              {{ task.completed ? 'Undo' : 'Complete' }}
+            </button>
+            <button @click="deleteTask(index)" class="btn btn-error btn-sm">Delete</button>
+          </div>
+        </div>
+      </li>
+    </ul>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
+/* Add any scoped custom styles here if needed. */
 </style>
