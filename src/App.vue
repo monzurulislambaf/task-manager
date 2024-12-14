@@ -1,18 +1,15 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 
-// Reactive state
 const tasks = ref([]);
 const showForm = ref(false);
 const newTask = ref('');
 
-// Load tasks from localStorage
 onMounted(() => {
   const savedTasks = localStorage.getItem('tasks');
   tasks.value = savedTasks ? JSON.parse(savedTasks) : [];
 });
 
-// Save tasks to localStorage whenever they change
 watch(
   tasks,
   (newVal) => {
@@ -21,7 +18,6 @@ watch(
   { deep: true }
 );
 
-// Methods
 const toggleForm = () => {
   showForm.value = !showForm.value;
 };
@@ -43,7 +39,6 @@ const toggleCompletion = (index) => {
   tasks.value[index].completed = !tasks.value[index].completed;
 };
 
-// Dynamic styles
 const taskStyle = (completed) =>
   completed
     ? 'bg-green-100 border-red-500 border-2'
@@ -54,7 +49,6 @@ const taskStyle = (completed) =>
   <div class="max-w-lg mx-auto p-4">
     <h1 class="text-2xl font-bold mb-4 text-center">Task Manager</h1>
 
-    <!-- Toggle Add Task Form -->
     <button
       @click="toggleForm"
       class="btn btn-primary mb-4 w-full"
@@ -62,7 +56,6 @@ const taskStyle = (completed) =>
       {{ showForm ? 'Close Form' : 'Add Task' }}
     </button>
 
-    <!-- Add Task Form -->
     <div v-if="showForm" class="mb-4 space-y-2">
       <input
         v-model="newTask"
@@ -73,10 +66,8 @@ const taskStyle = (completed) =>
       <button @click="addTask" class="btn btn-success w-full">Add Task</button>
     </div>
 
-    <!-- Conditional Rendering for Task List -->
     <p v-if="!tasks.length" class="text-center text-gray-500">No tasks available</p>
 
-    <!-- Task List -->
     <ul class="space-y-3">
       <li
         v-for="(task, index) in tasks"
@@ -92,7 +83,6 @@ const taskStyle = (completed) =>
             {{ task.name }}
           </span>
 
-          <!-- Action Buttons -->
           <div class="flex space-x-2">
             <button
               @click="toggleCompletion(index)"
@@ -109,5 +99,4 @@ const taskStyle = (completed) =>
 </template>
 
 <style scoped>
-/* Add any scoped custom styles here if needed. */
 </style>
